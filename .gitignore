@@ -45,3 +45,14 @@ next-env.d.ts
 CRSportal.md
 CRShompage.md
 .claude/
+
+# python agents
+.venv/
+__pycache__/
+.pytest_cache/
+!.env.example
+
+# logs and local editor/doc copies
+*.log
+.vscode/
+fetchdocs/

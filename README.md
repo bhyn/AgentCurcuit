@@ -40,6 +40,7 @@ AI 에이전트가 10개, 100개가 되면 각자는 똑똑해도 서로가 뭘 
 | 예산 예약 (동시 요청에도 초과 불가) | ✅ 동작 |
 | 권한 통제 (에이전트별 접근 범위) | ✅ 동작 |
 | 이벤트 로그와 실시간 대시보드 (`/control`) | ✅ 동작 |
+| ASI:One 채팅 → 대장 → Credit 에이전트 → CRS 조회 (아래 11번 참고) | ✅ P17로 확인 |
 | 충돌 감지 (P17처럼 bureau끼리 결과가 다른 경우) | 🔜 예정 |
 | 사망 표시·동결 파일 처리와 실패 복구 (P14, P15) | 🔜 예정 |
 | Fraud 에이전트용 CRS 제품 연결 (신원 확인, FraudFinder) | 🔜 예정 |
@@ -141,6 +142,43 @@ lib/
 ## 10. 기술 스택
 
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · CRS Credit API (sandbox)
+
+## 11. ASI:One agents (Fetch.ai)
+
+A Python [uAgents](https://pypi.org/project/uagents/) pair lives in [`agents/`](agents/). You can chat with the lead agent from ASI:One:
+
+```
+ASI:One chat  ->  AgentCircuit (lead, Agent Chat Protocol)  ->  Credit agent  ->  Next.js gateway  ->  CRS sandbox
+```
+
+- **Lead agent** (`agents/lead_agent.py`): runs as a local agent with an Agentverse Mailbox. It acknowledges every `ChatMessage`, accepts one allowed sandbox persona per request (P01, P13, P14, P15, P17), delegates to the Credit agent and replies in chat.
+- **Credit agent** (`agents/credit_agent.py`): pulls TransUnion, Equifax and Experian for the persona. It holds no CRS credentials; it calls the existing `/api/crs/credit` route, which owns the credentials and the exact persona request bodies.
+- Requests and results are matched by `task_id`. Timeouts, CRS errors, gateway failures, no-hit, freeze and deceased are reported as different outcomes.
+- Replies are data summaries. They never approve, decline or call anyone a fraudster.
+
+### Run it
+
+```bash
+npm run dev                                   # 1) CRS gateway on :3000 (needs .env.local)
+
+cd agents                                     # first time only:
+python3.13 -m venv .venv                      #   Python 3.10-3.13 (3.14 is not supported by uAgents yet)
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python init_env.py                  #   writes agents/.env with fresh seeds; seeds are never printed
+
+.venv/bin/python credit_agent.py              # 2) Credit agent on :8002
+.venv/bin/python lead_agent.py                # 3) Lead agent on :8001 (Mailbox mode)
+```
+
+Then open the "Agent inspector" link printed by the lead agent, choose **Connect -> Mailbox**, and chat with the agent from its Agentverse profile: `Check credit for P17`.
+
+Offline check without Agentverse: `LEAD_MAILBOX=false .venv/bin/python lead_agent.py`, then `.venv/bin/python dev_client.py "Check credit for P17"`.
+Tests: `.venv/bin/python -m pytest -q`. All settings are listed in [`agents/.env.example`](agents/.env.example).
+
+### Status
+
+Verified: the full ASI:One chat -> lead -> Credit agent -> CRS sandbox -> chat round trip for P17, and local runs for P01, P14, P15, disallowed personas, gateway down, Credit agent down and timeouts.
+Not done yet: the shared budget and de-duplication gate is not connected to this agent path, and nothing has been submitted to Devpost.
 
 ---
 
