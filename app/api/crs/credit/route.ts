@@ -1,8 +1,13 @@
+import { devOnly } from "@/lib/control/identity";
 import { crsPost } from "@/lib/crs/client";
 import { BUREAUS, getPersona, type Bureau } from "@/lib/crs/personas";
 
 // POST { personaId: "P01", bureau: "experian" }
+// Unauthenticated and spends the team's CRS credentials, so local development only.
 export async function POST(request: Request) {
+  const unavailable = devOnly();
+  if (unavailable) return unavailable;
+
   const { personaId, bureau } = (await request.json().catch(() => ({}))) as {
     personaId?: string;
     bureau?: Bureau;

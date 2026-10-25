@@ -1,6 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
+
+// Live CRS calls use the team's sandbox credentials, so the API serves them only under `next dev`.
+const LIVE_CRS = process.env.NODE_ENV === "development";
 
 const PERSONAS = [
   { id: "P01", name: "Margaret Okafor", note: "Prime" },
@@ -53,12 +57,19 @@ export default function Home() {
         Pulls a credit report from all three bureaus for a sandbox persona. Calls run on the server; credentials never reach the browser.
       </p>
 
+      {!LIVE_CRS && (
+        <p className="mt-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
+          Live CRS sandbox calls run only on a local development server. This public deployment shows a{" "}
+          <Link href="/control" className="font-medium underline">recorded agent run in the Control Tower</Link>.
+        </p>
+      )}
+
       <div className="mt-6 flex flex-wrap gap-2">
         {PERSONAS.map((p) => (
           <button
             key={p.id}
             onClick={() => run(p.id)}
-            disabled={busy !== null}
+            disabled={busy !== null || !LIVE_CRS}
             className="rounded-md border border-neutral-300 px-3 py-2 text-left text-sm hover:bg-neutral-100 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
           >
             <div className="font-medium">

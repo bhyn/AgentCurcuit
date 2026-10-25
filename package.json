@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/policy.test.mjs"
+    "test": "node --test tests/policy.test.mjs tests/recorded-demo.test.mjs"
   },
   "dependencies": {
     "@x402/core": "^2.28.0",

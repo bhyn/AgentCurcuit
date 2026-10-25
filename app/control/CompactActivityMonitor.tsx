@@ -62,16 +62,23 @@ export default function CompactActivityMonitor({
   stats,
   events,
   stateError,
+  recorded,
 }: {
   stats?: Stats;
   events: PolicyEvent[];
   stateError: boolean;
+  // A recorded run replaces the live APIs; nothing is polled.
+  recorded?: { activity: Activity[]; log: string };
 }) {
-  const [activity, setActivity] = useState<Activity[]>([]);
+  const [liveActivity, setActivity] = useState<Activity[]>([]);
   const [activityError, setActivityError] = useState(false);
-  const [runnerLog, setRunnerLog] = useState("");
+  const [liveRunnerLog, setRunnerLog] = useState("");
+  const isRecorded = recorded !== undefined;
+  const activity = recorded ? recorded.activity : liveActivity;
+  const runnerLog = recorded ? recorded.log : liveRunnerLog;
 
   useEffect(() => {
+    if (isRecorded) return;
     let active = true;
     async function refreshX402() {
       try {
@@ -86,10 +93,11 @@ export default function CompactActivityMonitor({
     void refreshX402();
     const timer = setInterval(() => void refreshX402(), 1500);
     return () => { active = false; clearInterval(timer); };
-  }, []);
+  }, [isRecorded]);
 
 
   useEffect(() => {
+    if (isRecorded) return;
     let active = true;
     async function refresh() {
       try {
@@ -104,7 +112,7 @@ export default function CompactActivityMonitor({
     void refresh();
     const timer = setInterval(() => void refresh(), 1000);
     return () => { active = false; clearInterval(timer); };
-  }, []);
+  }, [isRecorded]);
 
   const decisions = activity.filter((item) => item.type === "AI_DECISION");
   const messages = activity.filter((item) => item.type === "MESSAGE_SENT");
@@ -182,10 +190,10 @@ export default function CompactActivityMonitor({
     <section className={s.panel} aria-label="Live AI agent monitoring">
       <div className={s.monitorHeader}>
         <div>
-          <p className={s.eyebrow}>02 / Live oversight</p>
+          <p className={s.eyebrow}>{isRecorded ? "02 / Recorded oversight" : "02 / Live oversight"}</p>
           <h2 className={s.panelTitle}>Agent Activity</h2>
         </div>
-        <span className={s.livePill}><span className={s.dot} />{stateError || activityError ? "Sync issue" : "Live · 1s"}</span>
+        <span className={s.livePill}><span className={s.dot} />{isRecorded ? "Recorded run" : stateError || activityError ? "Sync issue" : "Live · 1s"}</span>
       </div>
 
       <div className={s.metricsGrid}>
@@ -240,7 +248,7 @@ export default function CompactActivityMonitor({
         <div style={{ margin: "0 19px 12px", padding: "10px 12px", border: "1px solid #35455f", background: "#0b1728", borderRadius: 11, flex: "none" }} aria-label="x402 payment security">
           <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", marginBottom: 8 }}>
             <strong style={{ fontSize: 12, color: "#dce7fd" }}>Payment Security · x402</strong>
-            <span style={{ fontSize: 10, color: "#92a5bf" }}>Live runner results</span>
+            <span style={{ fontSize: 10, color: "#92a5bf" }}>{isRecorded ? "Recorded runner results" : "Live runner results"}</span>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
             <div style={{ minWidth: 0 }}>
@@ -261,12 +269,12 @@ export default function CompactActivityMonitor({
 
       <div className={s.timelineWrap}>
         <div className={s.timelineHeading}>
-          <h3 className={s.timelineTitle}>Live Activity Timeline</h3>
+          <h3 className={s.timelineTitle}>{isRecorded ? "Recorded Activity Timeline" : "Live Activity Timeline"}</h3>
           <span className={s.timelineHint}>AI · messages · access policy</span>
         </div>
         <div className={s.timelineList}>
           {timeline.length === 0 ? (
-            <p className={s.empty}>No events yet. Run AI Agents to watch decisions and signed requests here.</p>
+            <p className={s.empty}>{isRecorded ? "Press Replay to step through the recorded run." : "No events yet. Run AI Agents to watch decisions and signed requests here."}</p>
           ) : timeline.map((entry) => (
             <article key={entry.key} className={s.timelineEvent}>
               <span className={s.timelineIcon} aria-hidden="true">{entry.icon}</span>

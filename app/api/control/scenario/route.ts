@@ -1,11 +1,16 @@
 import { requestCreditReport } from "@/lib/control/circuit";
+import { devOnly } from "@/lib/control/identity";
 import { resetStore, store } from "@/lib/control/store";
 import { PERSONAS, type Bureau } from "@/lib/crs/personas";
 
 const BUREAU_IDS: Bureau[] = ["transunion", "equifax", "experian"];
 
 // POST { scenario: "dedup" | "budget" | "reset" }
+// Unauthenticated and triggers real CRS pulls, so local development only.
 export async function POST(request: Request) {
+  const unavailable = devOnly();
+  if (unavailable) return unavailable;
+
   const { scenario } = (await request.json().catch(() => ({}))) as { scenario?: string };
 
   if (scenario === "reset") {

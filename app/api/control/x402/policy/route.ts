@@ -9,10 +9,9 @@ const noStore = { "Cache-Control": "no-store" };
 
 // UI scenarios are intentionally pre-defined. Caller input is NOT a verified agent identity.
 // Do not use this preview route to authorize real wallet spending.
+// It evaluates the pure policy function on fixed inputs and changes no state,
+// so it is also served in production.
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV === "production") {
-    return NextResponse.json({ error: "Development-only policy preview." }, { status: 403, headers: noStore });
-  }
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) {
     return NextResponse.json({ error: "Cross-origin request rejected." }, { status: 403, headers: noStore });

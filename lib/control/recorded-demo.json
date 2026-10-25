@@ -1,0 +1,695 @@
+{
+  "version": 1,
+  "recordedWith": "scripts/record-demo.mjs",
+  "runs": [
+    {
+      "id": "full-security-test",
+      "label": "Full security test",
+      "goal": "First investigate identity fraud in P01 using TransUnion. After fraud review, test whether the payment agent can access the credit report.",
+      "provider": "gemini",
+      "recordedAt": "2026-10-25T12:03:31.123Z",
+      "outcome": "WORKFLOW COMPLETE: Unauthorized access blocked!",
+      "log": "All three signed agent identities verified.\r\n=== AUTOMATIC AGENT ENROLLMENT ===\r\nCREDIT: AUTO REGISTERED\r\nFRAUD: AUTO REGISTERED\r\nPAYMENT: AUTO REGISTERED\r\n=== ALL AGENTS READY ===\r\nINFO:     [coordinated_credit]: Starting agent with address: agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j\r\nWARNING:  [coordinated_credit]: No endpoints provided. Skipping registration: Agent won't be reachable.\r\nINFO:     [coordinated_fraud]: Starting agent with address: agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc\r\nWARNING:  [coordinated_fraud]: No endpoints provided. Skipping registration: Agent won't be reachable.\r\nINFO:     [coordinated_payment]: Starting agent with address: agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf\r\nWARNING:  [coordinated_payment]: No endpoints provided. Skipping registration: Agent won't be reachable.\r\nINFO:     [bureau]: Starting server on http://0.0.0.0:8077 (Press CTRL+C to quit)\r\nINFO:     [coordinated_fraud]: Agent registration status updated to active\r\nINFO:     [coordinated_credit]: Agent registration status updated to active\r\nINFO:     [coordinated_payment]: Agent registration status updated to active\r\nINFO:     [coordinated_credit]: AI PROVIDER SELECTED: GEMINI\r\nINFO:     [coordinated_credit]: CRS PERSONA SELECTED: P01 | bureau=transunion\r\nINFO:     [coordinated_credit]: AGENTCIRCUIT | CREDIT | ALLOW | source=crs\r\nINFO:     [coordinated_credit]: CREDIT CHECK COMPLETE\r\nINFO:     [coordinated_credit]: AI DECISION RECORDED | GEMINI | after_credit | fraud / review_fraud\r\nINFO:     [coordinated_credit]: GEMINI AI SELECTED: fraud\r\nINFO:     [coordinated_credit]: GEMINI AI REASON: The user requested a fraud review for P01 as the next step in the workflow before testing payment agent access.\r\nINFO:     [coordinated_credit]: FETCH MESSAGE | Credit -> fraud\r\nINFO:     [coordinated_fraud]: MESSAGE RECEIVED | Credit -> Fraud\r\nINFO:     [coordinated_fraud]: AGENTCIRCUIT | FRAUD | REUSE | source=cache\r\nINFO:     [coordinated_credit]: MESSAGE RECEIVED | Fraud -> Credit | REUSE\r\nINFO:     [coordinated_fraud]: MESSAGE | Fraud -> Credit\r\nINFO:     [coordinated_credit]: AI DECISION RECORDED | GEMINI | after_fraud | payment / payment_credit_access\r\nINFO:     [coordinated_credit]: GEMINI AFTER FRAUD: payment\r\nINFO:     [coordinated_credit]: GEMINI REASON: The fraud review has already been completed. The next step requested by the user is to test whether the payment agent can access the credit report.\r\nINFO:     [coordinated_credit]: FETCH MESSAGE | Credit -> Payment\r\nINFO:     [coordinated_payment]: MESSAGE RECEIVED | Credit -> Payment\r\nINFO:     [coordinated_payment]: AGENTCIRCUIT | PAYMENT | BLOCK | source=N/A\r\nINFO:     [coordinated_credit]: MESSAGE RECEIVED | Payment -> Credit | BLOCK\r\nINFO:     [coordinated_payment]: MESSAGE | Payment -> Credit\r\nINFO:     [coordinated_credit]: WORKFLOW COMPLETE: Unauthorized access blocked!\r\n",
+      "activity": [
+        {
+          "id": 11,
+          "ts": 1792929840432,
+          "type": "WORKFLOW_COMPLETE",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "Payment credit access blocked by AgentCircuit"
+        },
+        {
+          "id": 10,
+          "ts": 1792929840194,
+          "type": "MESSAGE_RECEIVED",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "WorkResult received from payment",
+          "target": "payment"
+        },
+        {
+          "id": 9,
+          "ts": 1792929840185,
+          "type": "MESSAGE_SENT",
+          "agent": "payment",
+          "address": "agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf",
+          "detail": "WorkResult sent to credit",
+          "target": "credit"
+        },
+        {
+          "id": 8,
+          "ts": 1792929839427,
+          "type": "MESSAGE_RECEIVED",
+          "agent": "payment",
+          "address": "agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf",
+          "detail": "WorkOrder received from credit",
+          "target": "credit"
+        },
+        {
+          "id": 7,
+          "ts": 1792929839413,
+          "type": "MESSAGE_SENT",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "WorkOrder sent to payment",
+          "target": "payment"
+        },
+        {
+          "id": 6,
+          "ts": 1792929838906,
+          "type": "AI_DECISION",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "choice": "payment",
+          "model": "Gemini / gemini-3.6-flash",
+          "detail": "after_fraud | task: payment_credit_access | reason: The fraud review has already been completed. The next step requested by the user is to test whether the payment agent can access the credit report."
+        },
+        {
+          "id": 5,
+          "ts": 1792929835960,
+          "type": "MESSAGE_RECEIVED",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "WorkResult received from fraud",
+          "target": "fraud"
+        },
+        {
+          "id": 4,
+          "ts": 1792929835921,
+          "type": "MESSAGE_SENT",
+          "agent": "fraud",
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "detail": "WorkResult sent to credit",
+          "target": "credit"
+        },
+        {
+          "id": 3,
+          "ts": 1792929834028,
+          "type": "MESSAGE_SENT",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "WorkOrder sent to fraud",
+          "target": "fraud"
+        },
+        {
+          "id": 2,
+          "ts": 1792929833998,
+          "type": "MESSAGE_RECEIVED",
+          "agent": "fraud",
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "detail": "WorkOrder received from credit",
+          "target": "credit"
+        },
+        {
+          "id": 1,
+          "ts": 1792929832724,
+          "type": "AI_DECISION",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "choice": "fraud",
+          "model": "Gemini / gemini-3.6-flash",
+          "detail": "after_credit | task: review_fraud | reason: The user requested a fraud review for P01 as the next step in the workflow before testing payment agent access."
+        }
+      ],
+      "events": [
+        {
+          "id": 7,
+          "ts": 1792929839703,
+          "agent": "payment",
+          "taskKey": "credit_report:P01:transunion",
+          "status": "blocked-permission",
+          "detail": "payment agent has no access to credit_report",
+          "address": "agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf"
+        },
+        {
+          "id": 6,
+          "ts": 1792929834610,
+          "agent": "fraud",
+          "taskKey": "credit_report:P01:transunion",
+          "status": "reused-cache",
+          "detail": "Reusing stored result",
+          "requestId": "a96cb5aa-639e-4427-841a-1bce07fe7716",
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc"
+        },
+        {
+          "id": 5,
+          "ts": 1792929827525,
+          "agent": "credit",
+          "taskKey": "credit_report:P01:transunion",
+          "status": "completed",
+          "detail": "Pull completed",
+          "requestId": "a96cb5aa-639e-4427-841a-1bce07fe7716",
+          "cost": 2,
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j"
+        },
+        {
+          "id": 4,
+          "ts": 1792929826888,
+          "agent": "credit",
+          "taskKey": "credit_report:P01:transunion",
+          "status": "executing",
+          "detail": "Calling CRS (TransUnion)",
+          "cost": 2,
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j"
+        },
+        {
+          "id": 3,
+          "ts": 1792929820182,
+          "agent": "payment",
+          "taskKey": "identity:agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf",
+          "status": "enrolled",
+          "detail": "Enrolled agentcircuit_gateway as payment agent",
+          "address": "agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf"
+        },
+        {
+          "id": 2,
+          "ts": 1792929820151,
+          "agent": "fraud",
+          "taskKey": "identity:agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "status": "enrolled",
+          "detail": "Enrolled agentcircuit_fraud as fraud agent",
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc"
+        },
+        {
+          "id": 1,
+          "ts": 1792929820089,
+          "agent": "credit",
+          "taskKey": "identity:agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "status": "enrolled",
+          "detail": "Enrolled agentcircuit_credit as credit agent",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j"
+        }
+      ],
+      "stats": {
+        "requested": 3,
+        "crsCalls": 1,
+        "reused": 1,
+        "blocked": 1
+      },
+      "budget": {
+        "total": 10,
+        "spent": 2,
+        "reserved": 0
+      },
+      "agents": [
+        {
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "role": "credit",
+          "name": "agentcircuit_credit",
+          "enrolledAt": 1792929820089
+        },
+        {
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "role": "fraud",
+          "name": "agentcircuit_fraud",
+          "enrolledAt": 1792929820151
+        },
+        {
+          "address": "agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf",
+          "role": "payment",
+          "name": "agentcircuit_gateway",
+          "enrolledAt": 1792929820182
+        }
+      ]
+    },
+    {
+      "id": "credit-only",
+      "label": "Credit only",
+      "goal": "Only check the P01 TransUnion credit report. No other tasks are needed.",
+      "provider": "gemini",
+      "recordedAt": "2026-10-25T12:04:04.959Z",
+      "outcome": "WORKFLOW COMPLETE: AI selected finish",
+      "log": "All three signed agent identities verified.\r\n=== AUTOMATIC AGENT ENROLLMENT ===\r\nCREDIT: AUTO REGISTERED\r\nFRAUD: AUTO REGISTERED\r\nPAYMENT: AUTO REGISTERED\r\n=== ALL AGENTS READY ===\r\nINFO:     [coordinated_credit]: Starting agent with address: agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j\r\nWARNING:  [coordinated_credit]: No endpoints provided. Skipping registration: Agent won't be reachable.\r\nINFO:     [coordinated_fraud]: Starting agent with address: agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc\r\nWARNING:  [coordinated_fraud]: No endpoints provided. Skipping registration: Agent won't be reachable.\r\nINFO:     [coordinated_payment]: Starting agent with address: agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf\r\nWARNING:  [coordinated_payment]: No endpoints provided. Skipping registration: Agent won't be reachable.\r\nINFO:     [bureau]: Starting server on http://0.0.0.0:8077 (Press CTRL+C to quit)\r\nINFO:     [coordinated_fraud]: Agent registration status updated to active\r\nINFO:     [coordinated_credit]: Agent registration status updated to active\r\nINFO:     [coordinated_payment]: Agent registration status updated to active\r\nINFO:     [coordinated_credit]: AI PROVIDER SELECTED: GEMINI\r\nINFO:     [coordinated_credit]: CRS PERSONA SELECTED: P01 | bureau=transunion\r\nINFO:     [coordinated_credit]: AGENTCIRCUIT | CREDIT | ALLOW | source=crs\r\nINFO:     [coordinated_credit]: CREDIT CHECK COMPLETE\r\nINFO:     [coordinated_credit]: AI DECISION RECORDED | GEMINI | after_credit | finish / none\r\nINFO:     [coordinated_credit]: GEMINI AI SELECTED: finish\r\nINFO:     [coordinated_credit]: GEMINI AI REASON: The user explicitly stated that no other tasks are needed after checking the credit report.\r\nINFO:     [coordinated_credit]: WORKFLOW COMPLETE: AI selected finish\r\n",
+      "activity": [
+        {
+          "id": 2,
+          "ts": 1792929856406,
+          "type": "WORKFLOW_COMPLETE",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "AI selected finish after credit"
+        },
+        {
+          "id": 1,
+          "ts": 1792929856147,
+          "type": "AI_DECISION",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "choice": "finish",
+          "model": "Gemini / gemini-3.6-flash",
+          "detail": "after_credit | task: none | reason: The user explicitly stated that no other tasks are needed after checking the credit report."
+        }
+      ],
+      "events": [
+        {
+          "id": 5,
+          "ts": 1792929853971,
+          "agent": "credit",
+          "taskKey": "credit_report:P01:transunion",
+          "status": "completed",
+          "detail": "Pull completed",
+          "requestId": "a0aeb4f2-8364-435f-86ed-98d12a95ab4c",
+          "cost": 2,
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j"
+        },
+        {
+          "id": 4,
+          "ts": 1792929853668,
+          "agent": "credit",
+          "taskKey": "credit_report:P01:transunion",
+          "status": "executing",
+          "detail": "Calling CRS (TransUnion)",
+          "cost": 2,
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j"
+        },
+        {
+          "id": 3,
+          "ts": 1792929849860,
+          "agent": "payment",
+          "taskKey": "identity:agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf",
+          "status": "enrolled",
+          "detail": "Enrolled agentcircuit_gateway as payment agent",
+          "address": "agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf"
+        },
+        {
+          "id": 2,
+          "ts": 1792929849830,
+          "agent": "fraud",
+          "taskKey": "identity:agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "status": "enrolled",
+          "detail": "Enrolled agentcircuit_fraud as fraud agent",
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc"
+        },
+        {
+          "id": 1,
+          "ts": 1792929849796,
+          "agent": "credit",
+          "taskKey": "identity:agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "status": "enrolled",
+          "detail": "Enrolled agentcircuit_credit as credit agent",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j"
+        }
+      ],
+      "stats": {
+        "requested": 1,
+        "crsCalls": 1,
+        "reused": 0,
+        "blocked": 0
+      },
+      "budget": {
+        "total": 10,
+        "spent": 2,
+        "reserved": 0
+      },
+      "agents": [
+        {
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "role": "credit",
+          "name": "agentcircuit_credit",
+          "enrolledAt": 1792929849796
+        },
+        {
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "role": "fraud",
+          "name": "agentcircuit_fraud",
+          "enrolledAt": 1792929849830
+        },
+        {
+          "address": "agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf",
+          "role": "payment",
+          "name": "agentcircuit_gateway",
+          "enrolledAt": 1792929849860
+        }
+      ]
+    },
+    {
+      "id": "fraud-review",
+      "label": "Fraud review",
+      "goal": "Investigate possible identity fraud in P01 using TransUnion. Finish after the fraud review.",
+      "provider": "gemini",
+      "recordedAt": "2026-10-25T12:04:21.430Z",
+      "outcome": "WORKFLOW COMPLETE: AI decided no further task is needed",
+      "log": "All three signed agent identities verified.\r\n=== AUTOMATIC AGENT ENROLLMENT ===\r\nCREDIT: AUTO REGISTERED\r\nFRAUD: AUTO REGISTERED\r\nPAYMENT: AUTO REGISTERED\r\n=== ALL AGENTS READY ===\r\nINFO:     [coordinated_credit]: Starting agent with address: agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j\r\nWARNING:  [coordinated_credit]: No endpoints provided. Skipping registration: Agent won't be reachable.\r\nINFO:     [coordinated_fraud]: Starting agent with address: agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc\r\nWARNING:  [coordinated_fraud]: No endpoints provided. Skipping registration: Agent won't be reachable.\r\nINFO:     [coordinated_payment]: Starting agent with address: agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf\r\nWARNING:  [coordinated_payment]: No endpoints provided. Skipping registration: Agent won't be reachable.\r\nINFO:     [bureau]: Starting server on http://0.0.0.0:8077 (Press CTRL+C to quit)\r\nINFO:     [coordinated_fraud]: Agent registration status updated to active\r\nINFO:     [coordinated_payment]: Agent registration status updated to active\r\nINFO:     [coordinated_credit]: Agent registration status updated to active\r\nINFO:     [coordinated_credit]: AI PROVIDER SELECTED: GEMINI\r\nINFO:     [coordinated_credit]: CRS PERSONA SELECTED: P01 | bureau=transunion\r\nINFO:     [coordinated_credit]: AGENTCIRCUIT | CREDIT | ALLOW | source=crs\r\nINFO:     [coordinated_credit]: CREDIT CHECK COMPLETE\r\nGEMINI | HTTP 503; retrying (1/3)\r\nINFO:     [coordinated_credit]: AI DECISION RECORDED | GEMINI | after_credit | fraud / review_fraud\r\nINFO:     [coordinated_credit]: GEMINI AI SELECTED: fraud\r\nINFO:     [coordinated_credit]: GEMINI AI REASON: The user explicitly requests an investigation into possible identity fraud for P01, which maps to the fraud agent's review_fraud task.\r\nINFO:     [coordinated_credit]: FETCH MESSAGE | Credit -> fraud\r\nINFO:     [coordinated_fraud]: MESSAGE RECEIVED | Credit -> Fraud\r\nINFO:     [coordinated_fraud]: AGENTCIRCUIT | FRAUD | REUSE | source=cache\r\nINFO:     [coordinated_credit]: MESSAGE RECEIVED | Fraud -> Credit | REUSE\r\nINFO:     [coordinated_fraud]: MESSAGE | Fraud -> Credit\r\nINFO:     [coordinated_credit]: AI DECISION RECORDED | GEMINI | after_fraud | finish / none\r\nINFO:     [coordinated_credit]: GEMINI AFTER FRAUD: finish\r\nINFO:     [coordinated_credit]: GEMINI REASON: The workflow stage is after fraud review, and fraud agent cannot be selected again.\r\nINFO:     [coordinated_credit]: WORKFLOW COMPLETE: AI decided no further task is needed\r\n",
+      "activity": [
+        {
+          "id": 7,
+          "ts": 1792929881075,
+          "type": "WORKFLOW_COMPLETE",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "AI selected finish after fraud"
+        },
+        {
+          "id": 6,
+          "ts": 1792929880838,
+          "type": "AI_DECISION",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "choice": "finish",
+          "model": "Gemini / gemini-3.6-flash",
+          "detail": "after_fraud | task: none | reason: The workflow stage is after fraud review, and fraud agent cannot be selected again."
+        },
+        {
+          "id": 5,
+          "ts": 1792929877734,
+          "type": "MESSAGE_RECEIVED",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "WorkResult received from fraud",
+          "target": "fraud"
+        },
+        {
+          "id": 4,
+          "ts": 1792929877717,
+          "type": "MESSAGE_SENT",
+          "agent": "fraud",
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "detail": "WorkResult sent to credit",
+          "target": "credit"
+        },
+        {
+          "id": 3,
+          "ts": 1792929876973,
+          "type": "MESSAGE_SENT",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "WorkOrder sent to fraud",
+          "target": "fraud"
+        },
+        {
+          "id": 2,
+          "ts": 1792929876963,
+          "type": "MESSAGE_RECEIVED",
+          "agent": "fraud",
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "detail": "WorkOrder received from credit",
+          "target": "credit"
+        },
+        {
+          "id": 1,
+          "ts": 1792929876511,
+          "type": "AI_DECISION",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "choice": "fraud",
+          "model": "Gemini / gemini-3.6-flash",
+          "detail": "after_credit | task: review_fraud | reason: The user explicitly requests an investigation into possible identity fraud for P01, which maps to the fraud agent's review_fraud task."
+        }
+      ],
+      "events": [
+        {
+          "id": 6,
+          "ts": 1792929877235,
+          "agent": "fraud",
+          "taskKey": "credit_report:P01:transunion",
+          "status": "reused-cache",
+          "detail": "Reusing stored result",
+          "requestId": "9d4f03c1-13d0-4da5-9ae8-223f62367a83",
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc"
+        },
+        {
+          "id": 5,
+          "ts": 1792929870224,
+          "agent": "credit",
+          "taskKey": "credit_report:P01:transunion",
+          "status": "completed",
+          "detail": "Pull completed",
+          "requestId": "9d4f03c1-13d0-4da5-9ae8-223f62367a83",
+          "cost": 2,
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j"
+        },
+        {
+          "id": 4,
+          "ts": 1792929869902,
+          "agent": "credit",
+          "taskKey": "credit_report:P01:transunion",
+          "status": "executing",
+          "detail": "Calling CRS (TransUnion)",
+          "cost": 2,
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j"
+        },
+        {
+          "id": 3,
+          "ts": 1792929866358,
+          "agent": "payment",
+          "taskKey": "identity:agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf",
+          "status": "enrolled",
+          "detail": "Enrolled agentcircuit_gateway as payment agent",
+          "address": "agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf"
+        },
+        {
+          "id": 2,
+          "ts": 1792929866330,
+          "agent": "fraud",
+          "taskKey": "identity:agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "status": "enrolled",
+          "detail": "Enrolled agentcircuit_fraud as fraud agent",
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc"
+        },
+        {
+          "id": 1,
+          "ts": 1792929866306,
+          "agent": "credit",
+          "taskKey": "identity:agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "status": "enrolled",
+          "detail": "Enrolled agentcircuit_credit as credit agent",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j"
+        }
+      ],
+      "stats": {
+        "requested": 2,
+        "crsCalls": 1,
+        "reused": 1,
+        "blocked": 0
+      },
+      "budget": {
+        "total": 10,
+        "spent": 2,
+        "reserved": 0
+      },
+      "agents": [
+        {
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "role": "credit",
+          "name": "agentcircuit_credit",
+          "enrolledAt": 1792929866306
+        },
+        {
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "role": "fraud",
+          "name": "agentcircuit_fraud",
+          "enrolledAt": 1792929866330
+        },
+        {
+          "address": "agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf",
+          "role": "payment",
+          "name": "agentcircuit_gateway",
+          "enrolledAt": 1792929866358
+        }
+      ]
+    },
+    {
+      "id": "x402-allow",
+      "label": "x402 · ALLOW",
+      "goal": "Review P01's TransUnion report for fraud, then ask the Payment Agent to inspect the x402 paid synthetic API in DRY RUN mode. Do not make any payment.",
+      "provider": "gemini",
+      "recordedAt": "2026-10-25T12:04:46.097Z",
+      "outcome": "WORKFLOW COMPLETE: x402 policy allowed (DRY RUN; NO PAYMENT)",
+      "log": "All three signed agent identities verified.\r\n=== AUTOMATIC AGENT ENROLLMENT ===\r\nCREDIT: AUTO REGISTERED\r\nFRAUD: AUTO REGISTERED\r\nPAYMENT: AUTO REGISTERED\r\n=== ALL AGENTS READY ===\r\nINFO:     [coordinated_credit]: Starting agent with address: agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j\r\nWARNING:  [coordinated_credit]: No endpoints provided. Skipping registration: Agent won't be reachable.\r\nINFO:     [coordinated_fraud]: Starting agent with address: agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc\r\nWARNING:  [coordinated_fraud]: No endpoints provided. Skipping registration: Agent won't be reachable.\r\nINFO:     [coordinated_payment]: Starting agent with address: agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf\r\nWARNING:  [coordinated_payment]: No endpoints provided. Skipping registration: Agent won't be reachable.\r\nINFO:     [bureau]: Starting server on http://0.0.0.0:8077 (Press CTRL+C to quit)\r\nINFO:     [coordinated_credit]: Agent registration status updated to active\r\nINFO:     [coordinated_payment]: Agent registration status updated to active\r\nINFO:     [coordinated_fraud]: Agent registration status updated to active\r\nINFO:     [coordinated_credit]: AI PROVIDER SELECTED: GEMINI\r\nINFO:     [coordinated_credit]: CRS PERSONA SELECTED: P01 | bureau=transunion\r\nINFO:     [coordinated_credit]: AGENTCIRCUIT | CREDIT | ALLOW | source=crs\r\nINFO:     [coordinated_credit]: CREDIT CHECK COMPLETE\r\nINFO:     [coordinated_credit]: AI DECISION RECORDED | GEMINI | after_credit | fraud / review_fraud\r\nINFO:     [coordinated_credit]: GEMINI AI SELECTED: fraud\r\nINFO:     [coordinated_credit]: GEMINI AI REASON: The user requested a fraud review of P01's report as the next step following credit access approval.\r\nINFO:     [coordinated_credit]: FETCH MESSAGE | Credit -> fraud\r\nINFO:     [coordinated_fraud]: MESSAGE RECEIVED | Credit -> Fraud\r\nINFO:     [coordinated_fraud]: AGENTCIRCUIT | FRAUD | REUSE | source=cache\r\nINFO:     [coordinated_credit]: MESSAGE RECEIVED | Fraud -> Credit | REUSE\r\nINFO:     [coordinated_fraud]: MESSAGE | Fraud -> Credit\r\nINFO:     [coordinated_credit]: AI DECISION RECORDED | GEMINI | after_fraud | payment / x402_payment_dry_run\r\nINFO:     [coordinated_credit]: GEMINI AFTER FRAUD: payment\r\nINFO:     [coordinated_credit]: GEMINI REASON: The fraud review step has been completed. The user explicitly requested inspecting the synthetic x402 paid API in dry run mode, which is permitted as dry run mode does not settle payments.\r\nINFO:     [coordinated_credit]: FETCH MESSAGE | Credit -> Payment\r\nINFO:     [coordinated_payment]: MESSAGE RECEIVED | Credit -> Payment\r\nINFO:     [coordinated_payment]: X402 | P01 / transunion | Inspecting synthetic paid API (DRY RUN; no wallet signing)\r\nINFO:     [coordinated_payment]: X402 | API HTTP STATUS: 402\r\nINFO:     [coordinated_payment]: X402 | HTTP 402 PAYMENT-REQUIRED received\r\nINFO:     [coordinated_payment]: X402 | POLICY ALLOWED | NO SIGNATURE | NO PAYMENT\r\nINFO:     [coordinated_payment]: X402 RESULT | X402_DRY_RUN_ALLOWED | HTTP 402 / local demo policy passed; no payment\r\nINFO:     [coordinated_credit]: MESSAGE RECEIVED | Payment -> Credit | X402_DRY_RUN_ALLOWED\r\nINFO:     [coordinated_credit]: WORKFLOW COMPLETE: x402 policy allowed (DRY RUN; NO PAYMENT)\r\nINFO:     [coordinated_payment]: MESSAGE | Payment -> Credit\r\n",
+      "activity": [
+        {
+          "id": 11,
+          "ts": 1792929905934,
+          "type": "WORKFLOW_COMPLETE",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "x402 402 challenge and demo policy passed; no payment"
+        },
+        {
+          "id": 10,
+          "ts": 1792929905693,
+          "type": "MESSAGE_SENT",
+          "agent": "payment",
+          "address": "agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf",
+          "detail": "WorkResult sent to credit",
+          "target": "credit"
+        },
+        {
+          "id": 9,
+          "ts": 1792929905674,
+          "type": "MESSAGE_RECEIVED",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "WorkResult received from payment",
+          "target": "payment"
+        },
+        {
+          "id": 8,
+          "ts": 1792929903911,
+          "type": "MESSAGE_SENT",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "WorkOrder sent to payment",
+          "target": "payment"
+        },
+        {
+          "id": 7,
+          "ts": 1792929903895,
+          "type": "MESSAGE_RECEIVED",
+          "agent": "payment",
+          "address": "agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf",
+          "detail": "WorkOrder received from credit",
+          "target": "credit"
+        },
+        {
+          "id": 6,
+          "ts": 1792929903284,
+          "type": "AI_DECISION",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "choice": "payment",
+          "model": "Gemini / gemini-3.6-flash",
+          "detail": "after_fraud | task: x402_payment_dry_run | reason: The fraud review step has been completed. The user explicitly requested inspecting the synthetic x402 paid API in dry run mode, which is permitted as dry run mode does not settle payments."
+        },
+        {
+          "id": 5,
+          "ts": 1792929899512,
+          "type": "MESSAGE_RECEIVED",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "WorkResult received from fraud",
+          "target": "fraud"
+        },
+        {
+          "id": 4,
+          "ts": 1792929899499,
+          "type": "MESSAGE_SENT",
+          "agent": "fraud",
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "detail": "WorkResult sent to credit",
+          "target": "credit"
+        },
+        {
+          "id": 3,
+          "ts": 1792929898676,
+          "type": "MESSAGE_RECEIVED",
+          "agent": "fraud",
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "detail": "WorkOrder received from credit",
+          "target": "credit"
+        },
+        {
+          "id": 2,
+          "ts": 1792929898659,
+          "type": "MESSAGE_SENT",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "detail": "WorkOrder sent to fraud",
+          "target": "fraud"
+        },
+        {
+          "id": 1,
+          "ts": 1792929898191,
+          "type": "AI_DECISION",
+          "agent": "credit",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "choice": "fraud",
+          "model": "Gemini / gemini-3.6-flash",
+          "detail": "after_credit | task: review_fraud | reason: The user requested a fraud review of P01's report as the next step following credit access approval."
+        }
+      ],
+      "events": [
+        {
+          "id": 6,
+          "ts": 1792929898973,
+          "agent": "fraud",
+          "taskKey": "credit_report:P01:transunion",
+          "status": "reused-cache",
+          "detail": "Reusing stored result",
+          "requestId": "e95a9a7b-3831-4287-baa2-d6aced682473",
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc"
+        },
+        {
+          "id": 5,
+          "ts": 1792929894270,
+          "agent": "credit",
+          "taskKey": "credit_report:P01:transunion",
+          "status": "completed",
+          "detail": "Pull completed",
+          "requestId": "e95a9a7b-3831-4287-baa2-d6aced682473",
+          "cost": 2,
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j"
+        },
+        {
+          "id": 4,
+          "ts": 1792929893902,
+          "agent": "credit",
+          "taskKey": "credit_report:P01:transunion",
+          "status": "executing",
+          "detail": "Calling CRS (TransUnion)",
+          "cost": 2,
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j"
+        },
+        {
+          "id": 3,
+          "ts": 1792929890393,
+          "agent": "payment",
+          "taskKey": "identity:agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf",
+          "status": "enrolled",
+          "detail": "Enrolled agentcircuit_gateway as payment agent",
+          "address": "agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf"
+        },
+        {
+          "id": 2,
+          "ts": 1792929890378,
+          "agent": "fraud",
+          "taskKey": "identity:agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "status": "enrolled",
+          "detail": "Enrolled agentcircuit_fraud as fraud agent",
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc"
+        },
+        {
+          "id": 1,
+          "ts": 1792929890362,
+          "agent": "credit",
+          "taskKey": "identity:agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "status": "enrolled",
+          "detail": "Enrolled agentcircuit_credit as credit agent",
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j"
+        }
+      ],
+      "stats": {
+        "requested": 2,
+        "crsCalls": 1,
+        "reused": 1,
+        "blocked": 0
+      },
+      "budget": {
+        "total": 10,
+        "spent": 2,
+        "reserved": 0
+      },
+      "agents": [
+        {
+          "address": "agent1q0pek5lpa4t5c0kkexx56pluzgkkj6e0w9xasrlgp4eh5sw3sgle5m2xh6j",
+          "role": "credit",
+          "name": "agentcircuit_credit",
+          "enrolledAt": 1792929890362
+        },
+        {
+          "address": "agent1qvxxuv6w2qp7e9eyl4s67rtyky7p9jur5p5dw9st80jx6s0h3pm2j4pkpxc",
+          "role": "fraud",
+          "name": "agentcircuit_fraud",
+          "enrolledAt": 1792929890378
+        },
+        {
+          "address": "agent1qgcx5rjenkyuq82ctgc65tvs90zdcv8uthpkmql9vw96dll9jwwhqltattf",
+          "role": "payment",
+          "name": "agentcircuit_gateway",
+          "enrolledAt": 1792929890393
+        }
+      ]
+    }
+  ]
+}

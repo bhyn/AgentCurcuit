@@ -43,11 +43,15 @@ function shortAddress(address: string) {
   return address.length > 20 ? `${address.slice(0, 12)}…${address.slice(-6)}` : address;
 }
 
-export default function ActivityMonitor() {
-  const [activity, setActivity] = useState<Activity[]>([]);
+// `recordedActivity` replaces the live API with a recorded run; nothing is polled.
+export default function ActivityMonitor({ recordedActivity }: { recordedActivity?: Activity[] }) {
+  const [liveActivity, setActivity] = useState<Activity[]>([]);
   const [error, setError] = useState(false);
+  const isRecorded = recordedActivity !== undefined;
+  const activity = recordedActivity ?? liveActivity;
 
   useEffect(() => {
+    if (isRecorded) return;
     let active = true;
     async function refresh() {
       try {
@@ -62,7 +66,7 @@ export default function ActivityMonitor() {
     void refresh();
     const timer = setInterval(() => void refresh(), 1000);
     return () => { active = false; clearInterval(timer); };
-  }, []);
+  }, [isRecorded]);
 
   const decisions = activity.filter((a) => a.type === "AI_DECISION");
   const messages = activity.filter((a) => a.type === "MESSAGE_SENT");
@@ -73,10 +77,12 @@ export default function ActivityMonitor() {
       <div>
         <h2 className="text-xl font-semibold">AI Agent Activity Monitor</h2>
         <p className="mt-1 text-sm text-slate-400">
-          Signed Fetch.ai uAgents events and server-recorded AI decisions · refreshes every second
+          {isRecorded
+            ? "Signed Fetch.ai uAgents events and server-recorded AI decisions · recorded run"
+            : "Signed Fetch.ai uAgents events and server-recorded AI decisions · refreshes every second"}
         </p>
       </div>
-      {error && <p className="text-sm text-amber-400">Activity API is unavailable. Check the Next.js server.</p>}
+      {error && !isRecorded && <p className="text-sm text-amber-400">Activity API is unavailable. Check the Next.js server.</p>}
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-slate-700 bg-slate-900 p-5">
           <p className="text-sm text-slate-400">AI Decisions</p>

@@ -115,6 +115,27 @@ Sandbox personas available: P01, P13, P14, P15, P17.
 npm test
 ```
 
+## Public deployment (Vercel)
+
+Vercel cannot host the always-on Python uAgents Bureau, and AgentCircuit's state lives in memory, so a deployed build runs in **Recorded Demo** mode. `/control` replays workflows captured from a real local run (`lib/control/recorded-demo.json`) and labels them as recorded. No agent, AI model or CRS call runs on the deployment.
+
+| Route on a deployed build | Behavior |
+|---|---|
+| `GET /api/control/demo`, `GET /api/control/personas`, `GET /api/control/state` | Served (read-only, no secrets) |
+| `POST /api/control/x402/policy` | Served (pure policy preview on fixed inputs, no state change) |
+| `GET /api/control/x402/report` | Served; returns the real HTTP 402 challenge when `X402_PAY_TO` is set |
+| Signed agent APIs, `run-agents`, `ai-provider`, `activity`, `scenario`, `/api/crs/credit` | Local development only (404/403) |
+
+Vercel settings: Next.js preset, default build, output and install commands. The only environment variable the deployment uses is `X402_PAY_TO` (for the Payments Lab). Do **not** add CRS credentials, seed phrases, the agent token, `GEMINI_API_KEY` or `X402_BUYER_PRIVATE_KEY`: nothing on the deployment reads them.
+
+To refresh the recording, run the local stack and then:
+
+```bash
+node scripts/record-demo.mjs --provider=gemini   # or --provider=ollama
+```
+
+It drives the same APIs as the dashboard, keeps only runs that reach `WORKFLOW COMPLETE`, and redacts `.env.local` credentials and local paths.
+
 ## Safety notes
 
 - This is a local demo. Most control API routes, including agent requests and enrollment, refuse to run outside `next dev` until deployment security is in place.
