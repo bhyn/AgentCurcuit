@@ -1,50 +1,125 @@
-# AgentCircuit — Gemini 503 Retry Fix
+# AgentCircuit
 
-## What it fixes
+**Air traffic control for AI agents.** Many agents, one coordinated system.
 
-The Gemini API returns HTTP 503 (temporarily unavailable / overloaded). Before this patch, a single 503 stopped the workflow immediately. This patch makes only the AI planning request retry up to **3 total attempts**, waiting 1 second and then 2 seconds between retryable failures. It also retains the previous Gemini responseSchema compatibility fix.
+AgentCircuit is a control layer between autonomous AI agents and sensitive resources. Before any agent touches credit data or a paid API, AgentCircuit verifies who it is, checks what it may do, reuses work that was already done, and charges the request against a shared budget.
 
-- No automatic provider fallback; switch explicitly to Ollama if Gemini remains unavailable.
-- Never retries agent requests, data pulls, or payments; only the AI planning HTTP request.
-- No actual x402 payment is triggered.
-- It does not touch RunAgentPanel, Control Tower, API routes, signing keys, Next.js or Ollama.
-- Gemini 400/401/403 errors are NOT retried.
+The demo is a small lending team of three [Fetch.ai](https://fetch.ai) agents (Credit, Fraud, Payment) working against the CRS credit-bureau sandbox. An LLM (Gemini or a local Ollama model) decides which agent acts next. **AgentCircuit decides whether it is allowed.**
 
-## Install on Windows
+Built for Cal Hacks 13.0.
 
-Click **Stop** for current agents in Control Tower first. Save this ZIP into the project root:
+> Only CRS sandbox **test personas** are used. No real personal data is sent or stored. x402 runs as a **dry run**: no wallet signs and no money moves.
 
-`D:\Downloads\AgentCurcuit-main\AgentCurcuit-main`
+## What it does
 
-```powershell
-cd "D:\Downloads\AgentCurcuit-main\AgentCurcuit-main"
-Expand-Archive -Path .\AgentCircuit_Gemini_503_SafePatch.zip -DestinationPath . -Force
-.\.venv-fetch\Scripts\python.exe -B .\tools\patch_gemini_503.py
-.\.venv-fetch\Scripts\python.exe -B -c "import ast,pathlib; ast.parse(pathlib.Path('fetch_agents/ai_workflow_planner.py').read_text(encoding='utf-8')); print('PYTHON SYNTAX OK')"
+| Control | How it works |
+|---|---|
+| Verified identity | Each agent signs its request with its uAgent secp256k1 key. The server checks signature, timestamp (±2 min) and a single-use nonce, then takes the role from its own registry, never from the request body. |
+| Permissions | Credit and Fraud may read credit reports. Payment may not, so its attempt is blocked and logged. |
+| Deduplication | Pulls are keyed by `persona:bureau`. A repeat request reuses the cached result; a concurrent one joins the pull in flight. |
+| Budget | Each pull reserves its cost before the call. Concurrent agents cannot jointly overshoot; a failed pull refunds its reservation. |
+| Data minimization | Agents receive a summary (file status, scores, error codes, request ID), never the raw CRS file. |
+| Underwriting policy | Deceased flags, security freezes, scores below 660 and bureaus disagreeing by more than 50 points produce APPROVE, REVIEW or DECLINE with every reason listed. |
+| x402 spending guard | The Payment agent reads a real HTTP 402 `PAYMENT-REQUIRED` challenge and checks network (Base Sepolia), recipient and price against its limit, without signing. |
+| AI routing | The model returns `next_agent`, `task` and `reason` from a fixed allowlist. It never grants access. |
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Agents["Fetch.ai agents (uAgents Bureau)"]
+        C[Credit agent]
+        F[Fraud agent]
+        P[Payment agent]
+    end
+    AI["AI planner<br/>Gemini or Ollama"] -. picks next agent + task .-> C
+    C & F & P -- signed request --> AC
+    subgraph AC["AgentCircuit (Next.js API)"]
+        direction TB
+        S1[1. Verify signature and nonce] --> S2[2. Check role permission]
+        S2 --> S3[3. Dedupe: cache or in-flight]
+        S3 --> S4[4. Reserve budget]
+    end
+    AC -- allowed pulls --> CRS[(CRS sandbox<br/>TransUnion, Equifax, Experian)]
+    AC -- events --> UI[Control Tower dashboard]
+    P -. x402 dry run .-> X[x402 paid API<br/>Base Sepolia]
 ```
 
-Then click **Run AI Agents** again with Gemini. Keep the existing Next.js and Ollama servers running.
+Default demo run: Credit pulls the P01 TransUnion report (**ALLOW**), the AI routes to Fraud whose identical request is served from cache (**REUSE**), then routes to Payment whose attempt to read the report is **BLOCKED**.
 
-## If HTTP 503 continues
+## Project layout
 
-The Google server or access for your API key may still be unavailable. Try a different official stable model such as `gemini-3.6-flash`:
-
-```powershell
-notepad .env.local
+```
+app/control/            Control Tower dashboard (/control) and x402 Payments Lab (/control/x402)
+app/api/control/        Control API: agent-request, agents, state, activity, ai-plan, run-agents, x402, ...
+lib/control/            Signature verification, identity, permissions + dedupe + budget, policy, store
+lib/crs/                Server-side CRS client and sandbox persona fixtures
+fetch_agents/           Python uAgents; ai_coordinated_agents.py is the main workflow
+scripts/                x402 inspection / testnet payment script
+tests/                  x402 policy tests
+docs/                   Original idea notes and historical patch notes
 ```
 
-Add or update exactly one line:
+## Setup
 
-```dotenv
-GEMINI_MODEL=gemini-3.6-flash
+Requirements: Node.js 20+, Python 3.13, and either a Gemini API key or [Ollama](https://ollama.com) running locally.
+
+```bash
+# 1. Web app
+npm install
+cp .env.example .env.local      # then fill in the values
+
+# 2. Python agents (the dashboard launches .venv-fetch, so keep that name)
+python -m venv .venv-fetch
+.venv-fetch\Scripts\python.exe -m pip install -r requirements.txt     # Windows
+# .venv-fetch/bin/python -m pip install -r requirements.txt           # macOS / Linux
+
+# 3. Optional: local model instead of Gemini
+ollama pull qwen3:1.7b
 ```
 
-Save and click **Stop**, then **Run AI Agents** to launch a fresh Python process. No API key needs to be shared. Model choice UI still shows "Gemini 3.8 Flash" because this patch does not alter UI copy, so the precise model is determined by the env var. If neither Gemini model works, choose Ollama in Control Tower for an offline demo.
+### Environment variables
 
-## Rollback
+See [.env.example](.env.example). The essentials:
 
-Stop agents and restore:
+| Variable | Purpose |
+|---|---|
+| `CRS_USERNAME`, `CRS_PASSWORD` | CRS sandbox login, used only on the server |
+| `AGENTCIRCUIT_AGENT_TOKEN` | Operator token the agents use to enroll their addresses |
+| `CREDIT_AGENT_SEED_PHRASE`, `FRAUD_AGENT_SEED_PHRASE`, `AGENT_SEED_PHRASE` | uAgent identity seeds for Credit, Fraud and Payment |
+| `GEMINI_API_KEY` | Uses Gemini when set; otherwise Ollama |
+| `X402_PAY_TO` | Base Sepolia address you control; without it the x402 API returns 503 |
 
-```powershell
-Copy-Item .\fetch_agents\ai_workflow_planner.py.before-gemini-503.bak .\fetch_agents\ai_workflow_planner.py -Force
+## Run
+
+```bash
+npm run dev
 ```
+
+Open <http://localhost:3000/control>, choose a model and a scenario in **Run AI Agents**, and press Run. The dashboard starts the agents, which enroll themselves and run the workflow. Scenarios include credit only, fraud review, the payment access test, and x402 dry runs within and over budget.
+
+To run the agents from a terminal instead:
+
+```bash
+.venv-fetch\Scripts\python.exe fetch_agents\ai_coordinated_agents.py
+```
+
+The goal can be set with `AGENTCIRCUIT_DEMO_GOAL`, for example `"Investigate possible fraud in the P01 TransUnion credit report, then test whether the payment agent can access it."`
+
+Sandbox personas available: P01, P13, P14, P15, P17.
+
+### Tests
+
+```bash
+npm test
+```
+
+## Safety notes
+
+- This is a local demo. Most control API routes, including agent requests and enrollment, refuse to run outside `next dev` until deployment security is in place.
+- State (registry, cache, nonces, budget) lives in memory and resets when the server restarts.
+- The x402 resource is a synthetic report, not CRS data. Real testnet settlement exists only in `scripts/x402-payment-agent.mjs --pay` and requires `X402_ENABLE_TESTNET_PAYMENT=YES` plus a dedicated test wallet.
+
+## Built with
+
+Fetch.ai uAgents · Python · httpx · Next.js 16 · React 19 · TypeScript · Tailwind CSS · CRS Credit API (sandbox) · x402 · Base Sepolia · Gemini · Ollama
