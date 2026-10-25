@@ -134,7 +134,7 @@ To refresh the recording, run the local stack and then:
 node scripts/record-demo.mjs --provider=gemini   # or --provider=ollama
 ```
 
-It drives the same APIs as the dashboard, keeps only runs that reach `WORKFLOW COMPLETE`, and redacts `.env.local` credentials and local paths.
+It drives the same APIs as the dashboard, keeps only runs that reach `WORKFLOW COMPLETE`, and redacts `.env.local` credentials and local paths. Add `--only=<scenario id>` (for example `--only=x402-block-budget`) to re-record one scenario and keep the others.
 
 ## Safety notes
 

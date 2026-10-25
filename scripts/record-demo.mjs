@@ -6,7 +6,9 @@
 // fail or never reach a WORKFLOW COMPLETE marker are reported and not saved.
 //
 //   npm run dev                                  (in another terminal)
-//   node scripts/record-demo.mjs [--provider=gemini|ollama]
+//   node scripts/record-demo.mjs [--provider=gemini|ollama] [--only=<scenario id>]
+//
+// --only records one scenario and merges it into the existing file.
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -135,9 +137,14 @@ async function record(scenario, provider) {
 
 const providerArg = process.argv.find((arg) => arg.startsWith("--provider="))?.split("=")[1];
 const provider = providerArg === "gemini" || providerArg === "ollama" ? providerArg : "ollama";
+const only = process.argv.find((arg) => arg.startsWith("--only="))?.split("=")[1];
+if (only && !SCENARIOS.some((scenario) => scenario.id === only)) {
+  console.error(`Unknown scenario "${only}". Choose one of: ${SCENARIOS.map((scenario) => scenario.id).join(", ")}`);
+  process.exit(1);
+}
 
 const runs = [];
-for (const scenario of SCENARIOS) {
+for (const scenario of SCENARIOS.filter((item) => !only || item.id === only)) {
   process.stdout.write(`Recording "${scenario.label}" with ${provider}... `);
   try {
     const run = await record(scenario, provider);
@@ -152,5 +159,9 @@ if (runs.length === 0) {
   console.error("No run completed; recorded-demo.json left unchanged.");
   process.exit(1);
 }
-writeFileSync(OUTPUT, `${JSON.stringify({ version: 1, recordedWith: "scripts/record-demo.mjs", runs }, null, 2)}\n`);
-console.log(`Saved ${runs.length} run(s) to ${path.relative(ROOT, OUTPUT)}`);
+// With --only, keep the other recorded runs and order everything like SCENARIOS.
+const kept = only ? JSON.parse(readFileSync(OUTPUT, "utf8")).runs.filter((run) => run.id !== only) : [];
+const order = (run) => SCENARIOS.findIndex((scenario) => scenario.id === run.id);
+const saved = [...kept, ...runs].sort((a, b) => order(a) - order(b));
+writeFileSync(OUTPUT, `${JSON.stringify({ version: 1, recordedWith: "scripts/record-demo.mjs", runs: saved }, null, 2)}\n`);
+console.log(`Saved ${saved.length} run(s) to ${path.relative(ROOT, OUTPUT)}`);
