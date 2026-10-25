@@ -115,6 +115,20 @@ Sandbox personas available: P01, P13, P14, P15, P17.
 npm test
 ```
 
+## Live public demo (laptop + Cloudflare tunnel)
+
+To let judges run the real agents, keep the full stack on the laptop and expose it through a Cloudflare quick tunnel (no account needed):
+
+```bash
+# .env.local
+AGENTCIRCUIT_DEMO_CODE=<at least 8 characters, shared only with judges>
+
+npm run dev
+cloudflared tunnel --url http://localhost:3000   # prints https://<random>.trycloudflare.com
+```
+
+Through the tunnel, anyone can watch `/control`. Starting or stopping agents and switching the AI model need the access code, entered in the Run AI Agents panel. Direct CRS calls (`/api/crs/credit`, `/api/control/scenario`) are refused for tunnel requests, which Cloudflare marks with `cf-connecting-ip`. Without `AGENTCIRCUIT_DEMO_CODE`, tunnel visitors get the recorded demo. The URL works only while the laptop, `npm run dev` and `cloudflared` are running, and changes on every `cloudflared` start.
+
 ## Public deployment (Vercel)
 
 Vercel cannot host the always-on Python uAgents Bureau, and AgentCircuit's state lives in memory, so a deployed build runs in **Recorded Demo** mode. `/control` replays workflows captured from a real local run (`lib/control/recorded-demo.json`) and labels them as recorded. No agent, AI model or CRS call runs on the deployment.

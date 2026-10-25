@@ -62,8 +62,22 @@ export function readWorkflowOutcome(log: string): WorkflowOutcome | null {
   return { label: "WORKFLOW COMPLETE", message: "The workflow has finished. The agent process is still running.", tone: "success" };
 }
 
-export default function RunAgentPanel() {
+const CODE_KEY = "agentcircuit-demo-code";
+
+// `needsCode`: a visitor through the public tunnel, who must send the demo access code.
+export default function RunAgentPanel({ needsCode = false }: { needsCode?: boolean }) {
   const [goal, setGoal] = useState(DEFAULT_GOAL);
+  const [demoCode, setDemoCode] = useState("");
+
+  useEffect(() => {
+    if (!needsCode) return;
+    try {
+      const saved = sessionStorage.getItem(CODE_KEY);
+      if (saved) setDemoCode(saved);
+    } catch {
+      // Storage unavailable: the visitor types the code again.
+    }
+  }, [needsCode]);
   const [state, setState] = useState<RunState>({ status: "idle", goal: "", log: "", error: "" });
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -159,13 +173,19 @@ export default function RunAgentPanel() {
       setMessage(personaIssue || "Select a valid CRS sandbox persona.");
       return;
     }
+    if (needsCode && !demoCode.trim()) {
+      setMessage("Enter the demo access code to run agents.");
+      return;
+    }
     setBusy(true);
     setMessage("");
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (needsCode) headers["X-Demo-Code"] = demoCode.trim();
     try {
       if (action === "start") {
         const choice = await fetch("/api/control/ai-provider", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify({ provider }),
         });
         const chosen = await choice.json();
@@ -173,7 +193,7 @@ export default function RunAgentPanel() {
       }
       const response = await fetch(API, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ action, goal }),
       });
       const result = await response.json();
@@ -260,13 +280,31 @@ export default function RunAgentPanel() {
             </button>
           ))}
         </div>
+        {needsCode && (
+          <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, color: "#aebfdb", fontSize: 11 }}>
+            Demo access code
+            <input
+              type="password"
+              autoComplete="off"
+              aria-label="Demo access code"
+              value={demoCode}
+              disabled={running || busy}
+              onChange={(event) => {
+                setDemoCode(event.target.value);
+                try { sessionStorage.setItem(CODE_KEY, event.target.value); } catch { /* storage unavailable */ }
+              }}
+              style={{ flex: 1, minWidth: 0, background: "#111d31", color: "#eaf2ff", border: "1px solid #455570", borderRadius: 8, padding: "6px 9px" }}
+            />
+          </label>
+        )}
         <div className={s.actions}>
           <button className={s.startButton} type="button" disabled={busy || running || !providerLoaded || (provider === "gemini" && !geminiConfigured) || !goal.trim() || !selectionValid || !!catalogError} onClick={() => void control("start")}>▶ Run AI Agents</button>
           <button className={s.stopButton} type="button" disabled={busy || state.status !== "running"} onClick={() => void control("stop")}>Stop</button>
           <span className={s.envLabel}>{selectedPersona} · {selectedBureau} sandbox · {personas.length} configured</span>
         </div>
         {providerError && <p className={`${s.feedback} ${s.feedbackError}`}>{providerError}</p>}
-        {!geminiConfigured && providerLoaded && <p className={s.feedback}>Gemini requires GEMINI_API_KEY in .env.local (restart Next.js after adding it). Ollama remains available.</p>}
+        {!geminiConfigured && providerLoaded && !needsCode && <p className={s.feedback}>Gemini requires GEMINI_API_KEY in .env.local (restart Next.js after adding it). Ollama remains available.</p>}
+        {needsCode && <p className={s.feedback}>Live demo running on the team&apos;s laptop through a public tunnel. Watching is open; running agents needs the access code.</p>}
         {personaIssue && <p className={`${s.feedback} ${s.feedbackError}`}>{personaIssue}</p>}
         {catalogLoaded && !catalogError && personas.length < 20 && (
           <p className={s.feedback}>Only {personas.length} of the documented 20 sandbox personas have local fixtures. The remaining IDs require their official CRS request bodies.</p>

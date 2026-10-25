@@ -9,7 +9,7 @@ import CompactActivityMonitor from "./CompactActivityMonitor";
 import ActivityMonitor from "./ActivityMonitor";
 import s, { dashboardCss } from "./ControlDashboardStyles";
 
-type DemoInfo = { mode: "live" } | { mode: "recorded"; runs: RecordedRun[] };
+type DemoInfo = { mode: "live"; access: "local" | "code" } | { mode: "recorded"; runs: RecordedRun[] };
 
 const REPLAY_STEP_MS = 700;
 
@@ -90,14 +90,16 @@ export default function ControlPage() {
   useEffect(() => {
     let active = true;
     fetch("/api/control/demo", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : { mode: "live" }))
+      .then((response) => (response.ok ? response.json() : { mode: "live", access: "local" }))
       .then((data: DemoInfo) => {
         if (!active) return;
-        setDemo(data.mode === "recorded" ? { mode: "recorded", runs: Array.isArray(data.runs) ? data.runs : [] } : { mode: "live" });
+        setDemo(data.mode === "recorded"
+          ? { mode: "recorded", runs: Array.isArray(data.runs) ? data.runs : [] }
+          : { mode: "live", access: data.access === "code" ? "code" : "local" });
         if (data.mode === "recorded") setPlaying(true);
       })
-      // An older server without this route can only be a live one.
-      .catch(() => { if (active) setDemo({ mode: "live" }); });
+      // An older server without this route can only be a local live one.
+      .catch(() => { if (active) setDemo({ mode: "live", access: "local" }); });
     return () => { active = false; };
   }, []);
 
@@ -198,7 +200,7 @@ export default function ControlPage() {
                     className={s.localBadge}
                     style={recorded ? { color: "#f5c47d", background: "#483920", borderColor: "#87633b" } : undefined}
                   >
-                    {recorded ? "RECORDED DEMO" : "LOCAL DEMO"}
+                    {recorded ? "RECORDED DEMO" : demo.mode === "live" && demo.access === "code" ? "LIVE DEMO" : "LOCAL DEMO"}
                   </span>
                 )}
               </div>
@@ -242,7 +244,7 @@ export default function ControlPage() {
 
         {demo?.mode === "live" && (
           <div className={s.workspace}>
-            <RunAgentPanel />
+            <RunAgentPanel needsCode={demo.access === "code"} />
             <CompactActivityMonitor
               stats={state?.stats}
               events={events}

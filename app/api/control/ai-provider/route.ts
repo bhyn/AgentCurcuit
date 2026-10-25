@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { NextRequest } from "next/server";
+import { isSameOrigin, mayControl } from "@/lib/control/deployment";
 
 // Local development only. Both Next.js and Python share this non-secret choice.
 const CHOICE_FILE = join(process.cwd(), ".agentcircuit-ai-provider.json");
@@ -37,8 +38,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   if (!isDevelopment()) return Response.json({ error: "Not available" }, { status: 404 });
-  const origin = request.headers.get("origin");
-  if (!origin || origin !== new URL(request.url).origin) {
+  if (!mayControl(request)) return Response.json({ error: "Demo access code required" }, { status: 403 });
+  if (!isSameOrigin(request)) {
     return Response.json({ error: "Same-origin request required" }, { status: 403 });
   }
   let data: unknown;

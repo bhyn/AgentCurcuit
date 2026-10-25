@@ -2,6 +2,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { isSameOrigin, mayControl, mayWatch } from "@/lib/control/deployment";
 
 type Status =
   | "idle"
@@ -35,29 +36,14 @@ function getRunner(): Runner {
   return shared.__agentCircuitRunner;
 }
 
+// Dev server only. On this machine anyone may watch and control; through a
+// tunnel, watching needs AGENTCIRCUIT_DEMO_CODE configured and controlling
+// needs the visitor to send that code (lib/control/deployment.ts).
 function localOnly(request: Request, write = false) {
-  if (process.env.NODE_ENV !== "development") {
+  if (!(write ? mayControl(request) : mayWatch(request))) {
     return false;
   }
-
-  const url = new URL(request.url);
-  if (!["localhost", "127.0.0.1"].includes(url.hostname)) {
-    return false;
-  }
-
-  if (write) {
-    const origin = request.headers.get("origin");
-    if (!origin) return false;
-    try {
-      if (new URL(origin).origin !== url.origin) {
-        return false;
-      }
-    } catch {
-      return false;
-    }
-  }
-
-  return true;
+  return !write || isSameOrigin(request);
 }
 
 function appendLog(runner: Runner, value: string) {
@@ -83,7 +69,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   if (!localOnly(request, true)) {
-    return Response.json({ error: "Local development only" }, { status: 403 });
+    return Response.json({ error: "Demo access code required" }, { status: 403 });
   }
 
   let body: { action?: string; goal?: string };

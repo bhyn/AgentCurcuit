@@ -1,4 +1,5 @@
 import { requestCreditReport } from "@/lib/control/circuit";
+import { isLocalRequest } from "@/lib/control/deployment";
 import { devOnly } from "@/lib/control/identity";
 import { resetStore, store } from "@/lib/control/store";
 import { PERSONAS, type Bureau } from "@/lib/crs/personas";
@@ -6,10 +7,12 @@ import { PERSONAS, type Bureau } from "@/lib/crs/personas";
 const BUREAU_IDS: Bureau[] = ["transunion", "equifax", "experian"];
 
 // POST { scenario: "dedup" | "budget" | "reset" }
-// Unauthenticated and triggers real CRS pulls, so local development only.
+// Unauthenticated and triggers real CRS pulls, so only from this machine
+// under `next dev`; never through a public tunnel.
 export async function POST(request: Request) {
   const unavailable = devOnly();
   if (unavailable) return unavailable;
+  if (!isLocalRequest(request)) return Response.json({ error: "Local requests only" }, { status: 403 });
 
   const { scenario } = (await request.json().catch(() => ({}))) as { scenario?: string };
 

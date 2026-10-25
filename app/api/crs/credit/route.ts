@@ -1,12 +1,15 @@
+import { isLocalRequest } from "@/lib/control/deployment";
 import { devOnly } from "@/lib/control/identity";
 import { crsPost } from "@/lib/crs/client";
 import { BUREAUS, getPersona, type Bureau } from "@/lib/crs/personas";
 
 // POST { personaId: "P01", bureau: "experian" }
-// Unauthenticated and spends the team's CRS credentials, so local development only.
+// Unauthenticated and spends the team's CRS credentials, so only from this
+// machine under `next dev`; never through a public tunnel.
 export async function POST(request: Request) {
   const unavailable = devOnly();
   if (unavailable) return unavailable;
+  if (!isLocalRequest(request)) return Response.json({ error: "Local requests only" }, { status: 403 });
 
   const { personaId, bureau } = (await request.json().catch(() => ({}))) as {
     personaId?: string;

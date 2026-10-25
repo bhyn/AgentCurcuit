@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-// Live CRS calls use the team's sandbox credentials, so the API serves them only under `next dev`.
-const LIVE_CRS = process.env.NODE_ENV === "development";
+// Live CRS calls use the team's sandbox credentials, so the API serves them only
+// under `next dev` and only to requests from the laptop itself, not a tunnel.
+const DEV_SERVER = process.env.NODE_ENV === "development";
+const LOCAL_HOSTS = ["localhost", "127.0.0.1", "[::1]"];
 
 const PERSONAS = [
   { id: "P01", name: "Margaret Okafor", note: "Prime" },
@@ -33,6 +35,12 @@ type Row = {
 export default function Home() {
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
+  const [onLaptop, setOnLaptop] = useState(true);
+  const LIVE_CRS = DEV_SERVER && onLaptop;
+
+  useEffect(() => {
+    setOnLaptop(LOCAL_HOSTS.includes(window.location.hostname));
+  }, []);
 
   async function run(personaId: string) {
     setBusy(personaId);
@@ -59,8 +67,8 @@ export default function Home() {
 
       {!LIVE_CRS && (
         <p className="mt-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
-          Live CRS sandbox calls run only on a local development server. This public deployment shows a{" "}
-          <Link href="/control" className="font-medium underline">recorded agent run in the Control Tower</Link>.
+          Direct CRS sandbox calls run only on the team&apos;s laptop. Open the{" "}
+          <Link href="/control" className="font-medium underline">Control Tower</Link> to see the agent demo.
         </p>
       )}
 
