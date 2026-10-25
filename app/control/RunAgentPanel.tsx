@@ -213,6 +213,27 @@ export default function RunAgentPanel({ needsCode = false }: { needsCode?: boole
     }
   }
 
+  // Laptop only: the scenario route refuses tunnel requests.
+  async function resetCounters() {
+    if (!window.confirm("Reset all counters, activity, agent enrollment, CRS cache and budget?")) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/control/scenario", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scenario: "reset" }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "Reset failed");
+      setMessage("Counters reset. Agents re-enroll on the next run.");
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Reset failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const running = state.status === "running" || state.status === "stopping";
   const outcome = readWorkflowOutcome(state.log);
   const badgeClass = outcome?.tone === "failed" || state.status === "error"
@@ -306,6 +327,9 @@ export default function RunAgentPanel({ needsCode = false }: { needsCode?: boole
         <div className={s.actions}>
           <button className={s.startButton} type="button" disabled={busy || running || !providerLoaded || (provider === "gemini" && !geminiConfigured) || !goal.trim() || !selectionValid || !!catalogError} onClick={() => void control("start")}>▶ Run AI Agents</button>
           <button className={s.stopButton} type="button" disabled={busy || state.status !== "running"} onClick={() => void control("stop")}>Stop</button>
+          {!needsCode && (
+            <button className={s.stopButton} type="button" disabled={busy || running} title="Stop agents before resetting" onClick={() => void resetCounters()}>Reset</button>
+          )}
           <span className={s.envLabel}>{selectedPersona} · {selectedBureau} sandbox · {personas.length} configured</span>
         </div>
         {providerError && <p className={`${s.feedback} ${s.feedbackError}`}>{providerError}</p>}
