@@ -130,9 +130,3 @@ returns canned responses when the body matches exactly.
   trade terms.
 - A production version handling real consumers would need a permissible purpose and consent under
   FCRA; the sandbox data here is all fake.
-
-## Earlier work
-
-The earlier "AgentCircuit" prototype (agent control layer with ASI:One and uAgents) is not part
-of this branch's scope. The previous Korean README is kept locally as `README.agentcircuit.ko.md`
-(not committed).
