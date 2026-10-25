@@ -176,6 +176,9 @@ async def _ollama_plan(prompt: str) -> dict:
     payload = {
         "model": model,
         "stream": False,
+        # Qwen3 reasons at length before answering by default; on a CPU-only
+        # laptop that alone exceeds the timeout. The schema still constrains the output.
+        "think": False,
         "format": JSON_SCHEMA,
         "messages": [
             {"role": "system", "content": INSTRUCTIONS},
