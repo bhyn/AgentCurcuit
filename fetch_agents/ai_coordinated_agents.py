@@ -94,20 +94,25 @@ class WorkResult(Model):
     success: bool
 
 
-# Three independent agents with registered identities
+# Three independent agents with registered identities.
+# Telemetry is off: these run locally, and the payment seed is also an
+# Agentverse mailbox agent, whose event uploads fail with 401 here.
 credit = Agent(
     name="coordinated_credit",
     seed=SEEDS["credit"],
+    report_events=False,
 )
 
 fraud = Agent(
     name="coordinated_fraud",
     seed=SEEDS["fraud"],
+    report_events=False,
 )
 
 payment = Agent(
     name="coordinated_payment",
     seed=SEEDS["payment"],
+    report_events=False,
 )
 
 AGENTS = {
