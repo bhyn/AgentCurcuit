@@ -48,7 +48,7 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-5xl p-8 font-sans">
-      <h1 className="text-2xl font-semibold">CRS sandbox check</h1>
+      <h1 className="text-2xl font-semibold">AgentCircuit · CRS sandbox check</h1>
       <p className="mt-1 text-sm text-neutral-500">
         Pulls a credit report from all three bureaus for a sandbox persona. Calls run on the server; credentials never reach the browser.
       </p>

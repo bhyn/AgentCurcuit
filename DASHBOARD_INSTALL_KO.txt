@@ -1,0 +1,36 @@
+AgentCircuit Control Tower Dashboard UI
+=======================================
+
+Contents:
+  app/control/page.tsx
+  app/control/RunAgentPanel.tsx
+
+Changes:
+- Top: Project intro and explanation of AI / Fetch.ai / AgentCircuit
+- Three agent profile cards display real registered identity state from /api/control/state
+- Run AI Agents prompt and Run/Stop buttons stay at the top
+- Live Agent Logs immediately under the prompt/actions
+- Policy metrics and existing ActivityMonitor below
+- Older underwriting and detailed access history remain accessible in expandable Advanced diagnostics
+- Old Multi-Agent Live Demo and Budget Control UI not shown
+- No API or backend files changed
+
+Installation in Windows PowerShell:
+1. Copy AgentCircuit_Dashboard_UI.zip into project root:
+   D:\Downloads\AgentCurcuit-main\AgentCurcuit-main
+2. Run:
+   cd "D:\Downloads\AgentCurcuit-main\AgentCurcuit-main"
+   Copy-Item .\app\control\page.tsx .\app\control\page.tsx.before-dashboard.bak
+   Copy-Item .\app\control\RunAgentPanel.tsx .\app\control\RunAgentPanel.tsx.before-dashboard.bak
+   Expand-Archive -Path .\AgentCircuit_Dashboard_UI.zip -DestinationPath . -Force
+3. Refresh http://localhost:3000/control
+
+Rollback:
+   Copy-Item .\app\control\page.tsx.before-dashboard.bak .\app\control\page.tsx -Force
+   Copy-Item .\app\control\RunAgentPanel.tsx.before-dashboard.bak .\app\control\RunAgentPanel.tsx -Force
+
+Notes:
+- Use existing Next.js and Ollama server processes. No restart normally needed.
+- Server state is in memory; if enrollment resets, existing auto_enroll.py should re-register on Run.
+- Buttons use existing /api/control/run-agents endpoint.
+- Current sandbox persona/bureau are P01 / TransUnion regardless of prompt wording.

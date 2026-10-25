@@ -16,12 +16,5 @@ Cal Hacks용 CRS 금융 데이터 활용 서비스.
 - API 스키마와 테스트 입력은 CRS MCP에서 확인한다.
 - 제공된 테스트 persona의 요청 본문을 그대로 사용한다.
 - API 호출과 인증정보는 백엔드에서 관리한다.
-- 문서·스키마·persona 입력은 제공된 자료 또는 CRS MCP에서 필요한 제품만 확인한다.
-- 임의 개인정보를 만들거나 실제 소비자 정보를 보내지 않는다.
-- HTTP 200이어도 errorMessages, responseAlertMessages, 파일 상태를 확인한다.
-- NoHit, Freeze, Deceased, NoScore, 인증 실패, 통신 실패를 구분한다.
-- RequestID를 보관한다. 계정 비밀번호·토큰·전체 SSN은 로그와 UI에 표시하지 않는다.
-- 점수 비교 전 응답의 modelName을 확인한다. 서로 다른 모델의 점수 차이를 오류로 단정하지 않는다.
-- 스키마에 필드가 있어도 해당 persona 응답에 실제 값이 있다고 가정하지 않는다.
-- 현재 자료에는 TU FICO 9, Equifax·Experian VantageScore 4 설정이 나온다. 실제 응답으로 확인한다.
-- 로그인 토큰을 재사용한다. 반복 로그인 실패는 계정을 잠글 수 있으므로 무작정 재시도하지 않는다.
+- HTTP 200이어도 errorMessages를 확인한다.
+- RequestID를 보관해 디버깅에 사용한다.

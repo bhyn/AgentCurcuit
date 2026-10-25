@@ -46,13 +46,27 @@ CRSportal.md
 CRShompage.md
 .claude/
 
-# python agents
+# Fetch.ai uAgents identity and wallet private keys (created by uagents in the working directory)
+private_keys.json
+
+# python
 .venv/
+.venv-*/
 __pycache__/
 .pytest_cache/
-!.env.example
+
+# Local development AI provider selection
+.agentcircuit-ai-provider.json
 
 # logs and local editor/doc copies
 *.log
 .vscode/
 fetchdocs/
+
+# patch bundles and backup copies
+*.zip
+*.bak
+*.backup
+*_backup.txt
+fetch_agents/*_backup.py
+fetch_agents/*_before_*.py

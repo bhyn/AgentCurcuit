@@ -1,0 +1,33 @@
+AgentCircuit | REFINED 2-Column Control Tower
+============================================
+
+Changes: This version fixes the previous oversized single-column screenshot.
+It uses ControlDashboard.module.css, so its layout does not depend on Tailwind
+CSS detecting new utility classes.
+
+- Centered maximum width of 1460px with generous outer margins
+- Header, three compact agent identity cards
+- Desktop 2-column dashboard: LEFT goal + Run/Stop + scrollable logs;
+  RIGHT live metrics + latest AI/agent summary + scrollable timeline
+- Existing /api/control/state, /api/control/activity and /api/control/run-agents
+  endpoints remain unchanged. No Python changes.
+- Technical details accessible from the header; underwriting remains separate
+- Under 1100px screen width, the columns stack for readability
+
+FILES:
+  app/control/page.tsx
+  app/control/RunAgentPanel.tsx
+  app/control/CompactActivityMonitor.tsx
+  app/control/ControlDashboard.module.css   <-- NEW, important!
+
+INSTALL in Windows PowerShell:
+  cd "D:\Downloads\AgentCurcuit-main\AgentCurcuit-main"
+  Copy-Item .\app\control\page.tsx .\app\control\page.tsx.before-refined.bak
+  Copy-Item .\app\control\RunAgentPanel.tsx .\app\control\RunAgentPanel.tsx.before-refined.bak
+  Copy-Item .\app\control\CompactActivityMonitor.tsx .\app\control\CompactActivityMonitor.tsx.before-refined.bak
+  Expand-Archive -Path .\AgentCircuit_Refined_Dashboard.zip -DestinationPath . -Force
+
+Place this ZIP in the project root before running Expand-Archive.
+Do not restart Next.js unless necessary: agent registration is in memory.
+Open http://localhost:3000/control and press Ctrl+Shift+R.
+If the prior agents are still running, Stop before another Run.

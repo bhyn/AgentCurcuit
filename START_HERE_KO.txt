@@ -1,0 +1,59 @@
+AGENTCIRCUIT x402 PAYMENT LAB — FIRST MVP
+===========================================
+
+IMPORTANT: This is an ADD-ONLY integration. It does not replace your Control Tower,
+Fetch.ai agents, Ollama logic, signed agent middleware, or .env.local.
+
+STEP 1 — Extract this zip into:
+D:\Downloads\AgentCurcuit-main\AgentCurcuit-main
+
+STEP 2 — In PowerShell (inside the project's root):
+cd "D:\Downloads\AgentCurcuit-main\AgentCurcuit-main"
+Expand-Archive -Path .\AgentCircuit_x402_MVP.zip -DestinationPath . -Force
+npm.cmd install @x402/core @x402/evm @x402/next @x402/fetch viem
+
+STEP 3 — If next dev is already running, go to:
+http://localhost:3000/control/x402
+
+The three policy-preview buttons work without wallet setup. They simulate the
+policy outcome; they DO NOT authenticate Fetch.ai agent signatures or move money.
+
+STEP 4 — To get a REAL HTTP 402 from x402 SDK, configure a receiving wallet.
+In .env.local ADD (do not delete the existing lines):
+X402_PAY_TO=0xYOUR_OWN_BASE_SEPOLIA_RECEIVING_WALLET_ADDRESS
+
+Restart Next.js ONLY after changing .env.local.
+Open /control/x402 and click Inspect HTTP 402. Expect HTTP 402 and PAYMENT-REQUIRED.
+No payment is sent by this button.
+
+STEP 5 — Inspect from PowerShell without signing or paying:
+node --env-file=.env.local scripts/x402-payment-agent.mjs
+
+Expected: HTTP 402 + POLICY ALLOWED + DRY RUN SUCCESS.
+
+STEP 6 — OPTIONAL, ONLY AFTER YOU HAVE TEST USDC:
+Get a separate, disposable wallet funded with Base Sepolia test USDC.
+In .env.local ADD:
+X402_BUYER_PRIVATE_KEY=0xYOUR_PRIVATE_KEY (NEVER SHARE IT, NEVER COMMIT)
+X402_ENABLE_TESTNET_PAYMENT=YES
+
+Explicitly run once:
+node --env-file=.env.local scripts/x402-payment-agent.mjs --pay
+
+This may transfer 0.01 *testnet* USDC. Do not use mainnet funds or repeated
+payments. Only a successful 200 + PAYMENT-RESPONSE demonstrates settlement.
+
+OPTIONAL: Add link to the main Control Tower navigation (safe marker-based patch):
+powershell -ExecutionPolicy Bypass -File .\scripts\add-x402-link.ps1
+
+Technical limitations / what is NOT YET wired:
+- Payment Agent is currently a local Node buyer experiment, NOT the existing
+  Python Fetch.ai uAgents role/verified signer. This is the first integration step.
+- The paid resource is a fictional P01 report, not CRS or real credit data.
+- The three UI policy examples are dry-run previews only.
+- No payment can be initiated from the browser in this bundle.
+- Do not deploy this dev pilot to production or use real wallets.
+
+Official SDK and spec:
+https://github.com/x402-foundation/x402
+https://github.com/x402-foundation/x402/blob/main/docs/core-concepts/facilitator.md

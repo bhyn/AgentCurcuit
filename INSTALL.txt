@@ -1,0 +1,26 @@
+AgentCircuit Dashboard - Missing CSS fix (October 2026)
+
+PROBLEM: the page renders as plain, unstyled HTML even though the React components appear.
+The project has a custom Turbopack *.css loader rule that may interfere with CSS Modules.
+
+FIX: the same dashboard styling is embedded in a local TypeScript module,
+so there is no CSS asset/module for Turbopack to load. A React <style>
+node injects all the CSS classes directly. Features and API behavior unchanged.
+
+FILES (4):
+ app/control/page.tsx
+ app/control/RunAgentPanel.tsx
+ app/control/CompactActivityMonitor.tsx
+ app/control/ControlDashboardStyles.ts  [NEW]
+
+HOW TO INSTALL:
+ 1. Place AgentCircuit_Style_Fix.zip in project root.
+ 2. From project root in PowerShell:
+    Copy-Item .\app\control\page.tsx .\app\control\page.tsx.before-style-fix.bak -Force
+    Copy-Item .\app\control\RunAgentPanel.tsx .\app\control\RunAgentPanel.tsx.before-style-fix.bak -Force
+    Copy-Item .\app\control\CompactActivityMonitor.tsx .\app\control\CompactActivityMonitor.tsx.before-style-fix.bak -Force
+    Expand-Archive -Path .\AgentCircuit_Style_Fix.zip -DestinationPath . -Force
+ 3. Reload http://localhost:3000/control (Ctrl+Shift+R).
+
+No Python, API, identities, registrations, or process restarts are required.
+The old ControlDashboard.module.css can stay on disk unused.

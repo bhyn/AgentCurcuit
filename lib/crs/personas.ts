@@ -139,81 +139,8 @@ export const PERSONAS: Persona[] = [
       ],
     },
   },
-  {
-    id: "P07",
-    name: "MARCUS BELLAMY",
-    profile: "Chapter 13 active",
-    expectedDecision: "DECLINE",
-    expected: "560 x3, Chapter 13 filed 2025",
-    creditBody: {
-      firstName: "MARCUS",
-      lastName: "BELLAMY",
-      ssn: "666701007",
-      addresses: [
-        {
-          addressLine1: "1507 PEACHTREE INDUSTRIAL BLVD",
-          city: "ATLANTA",
-          state: "GA",
-          postalCode: "30341",
-          borrowerResidencyType: "Current",
-        },
-      ],
-    },
-  },
-  {
-    id: "P08",
-    name: "PRIYA VENKATESAN",
-    profile: "Tax lien and civil judgment",
-    expectedDecision: "REVIEW",
-    expected: "690 / 690 / 690",
-    creditBody: {
-      firstName: "PRIYA",
-      lastName: "VENKATESAN",
-      ssn: "666701008",
-      addresses: [
-        {
-          addressLine1: "3300 N LAKE SHORE DR APT 15C",
-          city: "CHICAGO",
-          state: "IL",
-          postalCode: "60657",
-          borrowerResidencyType: "Current",
-        },
-      ],
-    },
-  },
-  {
-    id: "P19",
-    name: "GRACE NAKAMURA",
-    profile: "Small-business owner",
-    expectedDecision: "APPROVE",
-    expected: "770 / 770 / 770 clean",
-    creditBody: {
-      firstName: "GRACE",
-      lastName: "NAKAMURA",
-      ssn: "666701019",
-      addresses: [
-        {
-          addressLine1: "1850 SOLANO AVE",
-          city: "BERKELEY",
-          state: "CA",
-          postalCode: "94707",
-          borrowerResidencyType: "Current",
-        },
-      ],
-    },
-  },
 ];
 
 export function getPersona(id: string): Persona | undefined {
   return PERSONAS.find((p) => p.id === id);
-}
-
-export type PitchPointBody = {
-  terms: { term: { person: { firstName: string; lastName: string; ssn: string } }[] };
-};
-
-// Public-records search body (PitchPoint BLJ), copied from the CRS MCP persona list.
-export function pitchPointBody(p: Persona): PitchPointBody {
-  const { firstName, lastName, ssn } = p.creditBody;
-  return { terms: { term: [{ person: { firstName, lastName, ssn } }] } };
 }
