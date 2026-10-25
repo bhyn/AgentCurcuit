@@ -54,7 +54,8 @@ app/control/            Control Tower dashboard (/control) and x402 Payments Lab
 app/api/control/        Control API: agent-request, agents, state, activity, ai-plan, run-agents, x402, ...
 lib/control/            Signature verification, identity, permissions + dedupe + budget, policy, store
 lib/crs/                Server-side CRS client and sandbox persona fixtures
-fetch_agents/           Python uAgents; ai_coordinated_agents.py is the main workflow
+fetch_agents/           Python uAgents; ai_coordinated_agents.py is the main workflow,
+                        asi_gateway_agent.py is an ASI:One chat gateway (see asi_gateway_README.md)
 scripts/                x402 inspection / testnet payment script
 tests/                  x402 policy tests
 docs/                   Original idea notes and historical patch notes
