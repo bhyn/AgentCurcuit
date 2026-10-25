@@ -267,18 +267,24 @@ export default function RunAgentPanel({ needsCode = false }: { needsCode?: boole
           onChange={(event) => setGoal(event.target.value)}
           disabled={running}
         />
-        <div className={s.examples}>
-          {EXAMPLES.map((example) => (
-            <button
-              className={s.exampleButton}
-              key={example.label}
-              type="button"
-              disabled={busy || running}
-              onClick={() => setGoal(changePersonaInGoal(example.goal, selectedPersona))}
-            >
-              {example.label}
-            </button>
-          ))}
+        <div className={s.examples} role="group" aria-label="Example tasks">
+          {EXAMPLES.map((example) => {
+            // Selected while the goal still reads exactly as this example (for the chosen persona).
+            const selected = goal === changePersonaInGoal(example.goal, selectedPersona);
+            return (
+              <button
+                className={s.exampleButton}
+                key={example.label}
+                type="button"
+                aria-pressed={selected}
+                style={selected ? { borderColor: "#9c93ff", color: "#fff", background: "#282d50" } : undefined}
+                disabled={busy || running}
+                onClick={() => setGoal(changePersonaInGoal(example.goal, selectedPersona))}
+              >
+                {selected ? "✓ " : ""}{example.label}
+              </button>
+            );
+          })}
         </div>
         {needsCode && (
           <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, color: "#aebfdb", fontSize: 11 }}>

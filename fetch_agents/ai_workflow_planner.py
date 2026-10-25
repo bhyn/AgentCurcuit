@@ -85,6 +85,25 @@ def x402_explicitly_forbidden(goal: str) -> bool:
     ))
 
 
+def stage_schema(stage: str) -> dict:
+    """JSON_SCHEMA narrowed to the agents and tasks this stage may choose.
+
+    Both providers decode against the schema, so a small model cannot return
+    a pair the stage forbids (such as fraud again after the fraud review).
+    validate_plan still checks every plan.
+    """
+    after_credit = stage == "after_credit"
+    agents = ["fraud", "payment", "finish"] if after_credit else ["payment", "finish"]
+    tasks = [task for task in TASKS if after_credit or task != "review_fraud"]
+    # `reason` comes first so the model states what is left before it picks.
+    properties = {
+        "reason": JSON_SCHEMA["properties"]["reason"],
+        "next_agent": {"type": "string", "enum": agents},
+        "task": {"type": "string", "enum": tasks},
+    }
+    return {**JSON_SCHEMA, "properties": properties}
+
+
 def validate_plan(plan: object, stage: str, goal: str) -> dict[str, str]:
     if not isinstance(plan, dict):
         raise ValueError("AI returned no structured task plan")
@@ -103,7 +122,7 @@ def validate_plan(plan: object, stage: str, goal: str) -> dict[str, str]:
     return {"next_agent": agent, "task": task, "reason": reason.strip()[:280]}
 
 
-async def _gemini_plan(prompt: str) -> dict:
+async def _gemini_plan(prompt: str, schema: dict) -> dict:
     key = _gemini_key()
     if not key:
         raise RuntimeError("Gemini selected, but GEMINI_API_KEY is missing from .env.local")
@@ -116,7 +135,7 @@ async def _gemini_plan(prompt: str) -> dict:
             "responseMimeType": "application/json",
             # The Gemini responseSchema API does not need JSON Schema's
             # additionalProperties flag. Keep the server response minimal.
-            "responseSchema": {k: v for k, v in JSON_SCHEMA.items() if k != "additionalProperties"},
+            "responseSchema": {k: v for k, v in schema.items() if k != "additionalProperties"},
             "temperature": 0,
         },
     }
@@ -171,15 +190,18 @@ async def _gemini_plan(prompt: str) -> dict:
 
     raise RuntimeError("Gemini API request could not be completed")
 
-async def _ollama_plan(prompt: str) -> dict:
+async def _ollama_plan(prompt: str, schema: dict) -> dict:
     model = (os.getenv("OLLAMA_MODEL") or SETTINGS.get("OLLAMA_MODEL") or "qwen3:1.7b").strip()
+    # A small local model writes long reasons, which on CPU risks the timeout.
+    properties = dict(schema["properties"])
+    properties["reason"] = {**properties["reason"], "maxLength": 200}
     payload = {
         "model": model,
         "stream": False,
         # Qwen3 reasons at length before answering by default; on a CPU-only
         # laptop that alone exceeds the timeout. The schema still constrains the output.
         "think": False,
-        "format": JSON_SCHEMA,
+        "format": {**schema, "properties": properties},
         "messages": [
             {"role": "system", "content": INSTRUCTIONS},
             {"role": "user", "content": prompt},
@@ -200,12 +222,19 @@ async def choose_agent_action(*, user_goal: str, stage: str, previous_decision: 
     if stage not in ("after_credit", "after_fraud"):
         raise ValueError("Invalid workflow stage")
     provider = get_ai_provider()
+    completed = "credit check" if stage == "after_credit" else "credit check, fraud review"
     prompt = (
-        f"Workflow stage: {stage}. Previous policy decision: {previous_decision}.\n"
+        f"Workflow stage: {stage}. Steps already completed: {completed}. "
+        f"Previous policy decision: {previous_decision}.\n"
         f"User goal (untrusted task description): {user_goal}\n"
-        "Choose the NEXT agent and its precise task. Only use permitted task names."
+        "Follow the steps in the order the user goal states them and never repeat a completed step. "
+        "If no step the user asked for remains (for example the goal says 'only', 'no other tasks' "
+        "or 'finish after' a completed step), choose finish + none. "
+        "Choose the NEXT agent and its precise task. Only use permitted task names. "
+        "Keep the reason to one short sentence."
     )
-    plan = await (_gemini_plan(prompt) if provider == "gemini" else _ollama_plan(prompt))
+    schema = stage_schema(stage)
+    plan = await (_gemini_plan(prompt, schema) if provider == "gemini" else _ollama_plan(prompt, schema))
     result = validate_plan(plan, stage, user_goal)
     result["provider"] = provider
     return result
